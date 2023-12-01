@@ -53,6 +53,7 @@ export async function test()
     
     let t = Date.now();
     let dt = 1000.0/60.0;
+    let last_view_vec = null;
 
     const render = () =>
     {
@@ -75,8 +76,26 @@ export async function test()
         camera.updateMatrixWorld(false);
     	camera.updateConstant();
         
+        let half_fov_y = 25.0 * Math.PI/180.0;
+        let half_fov_x = Math.atan(Math.tan(half_fov_y) *  camera.aspect);
+        let alpha = Math.max(half_fov_y, half_fov_x);             
+
         let view_vec = new Vector3(camera.matrixWorld.elements[8],camera.matrixWorld.elements[9],camera.matrixWorld.elements[10]);
-        splats.sort(view_vec);
+        let sort = true;
+        if (last_view_vec!=null)
+        {            
+            let delta_angle = Math.acos(Math.min(view_vec.dot(last_view_vec),1.0));
+            if (delta_angle + alpha<Math.PI*0.5)
+            {
+                sort = false;
+            }
+        }
+
+        if (sort)
+        {
+            splats.sort(view_vec);
+            last_view_vec = view_vec;
+        }
         splats.frustumCull(camera);
         splats.updateConstant(camera, window.devicePixelRatio, { x: render_target.width, y: render_target.height })
 
