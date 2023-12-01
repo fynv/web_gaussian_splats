@@ -117,11 +117,11 @@ export async function test()
 
         if (cull)
         {         
-            splats.frustumCull(camera);
-            splats.updateConstant(camera, window.devicePixelRatio, { x: render_target.width, y: render_target.height });
+            splats.frustumCull(camera);            
             last_camera_pos = cam_pos;
             last_camera_quat = cam_quat;
         }
+        splats.updateConstant(camera, window.devicePixelRatio, { x: render_target.width, y: render_target.height });
 
         let commandEncoder = engine_ctx.device.createCommandEncoder();
 
