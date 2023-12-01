@@ -54,6 +54,8 @@ export async function test()
     let t = Date.now();
     let dt = 1000.0/60.0;
     let last_view_vec = null;
+    let last_camera_pos = null;
+    let last_camera_quat = null;
 
     const render = () =>
     {
@@ -92,12 +94,34 @@ export async function test()
         }
 
         if (sort)
-        {
+        {    
             splats.sort(view_vec);
             last_view_vec = view_vec;
         }
-        splats.frustumCull(camera);
-        splats.updateConstant(camera, window.devicePixelRatio, { x: render_target.width, y: render_target.height })
+
+        let cam_pos = camera.position.clone();
+        let cam_quat = camera.quaternion.clone();
+        let cull = true;
+
+        if (!sort && last_camera_pos!=null)
+        {
+            let d_pos = cam_pos.clone();
+            d_pos.sub(last_camera_pos);
+            let diff_pos = d_pos.length();
+            let diff_quat = cam_quat.angleTo(last_camera_quat);
+            if (diff_pos<0.01 && diff_quat < 0.01)
+            {
+                cull = false;
+            }            
+        }
+
+        if (cull)
+        {         
+            splats.frustumCull(camera);
+            splats.updateConstant(camera, window.devicePixelRatio, { x: render_target.width, y: render_target.height });
+            last_camera_pos = cam_pos;
+            last_camera_quat = cam_quat;
+        }
 
         let commandEncoder = engine_ctx.device.createCommandEncoder();
 
