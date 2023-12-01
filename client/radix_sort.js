@@ -56,6 +56,10 @@ fn inFrustum(idx : u32, width: u32) -> bool
     let sampledCenterColor = textureLoad(uCentersColorsTexture, getDataIdx(idx, 1, 0, width), 0);
     let splatCenter = bitcast<vec3f>(sampledCenterColor.yzw);
     let viewCenter = uCamera.viewMat * vec4(splatCenter, 1.0);
+    if (length(viewCenter)>125.0)
+    {
+        return false;
+    }
     let clipCenter = uCamera.projMat * viewCenter;
     let ndcCenter = clipCenter.xyz / clipCenter.w;                
     return ndcCenter.x>-1.0 && ndcCenter.x<1.0 && ndcCenter.y>-1.0 && ndcCenter.y<1.0 && ndcCenter.z>-1.0 && ndcCenter.z<1.0;
