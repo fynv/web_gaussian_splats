@@ -36,10 +36,8 @@ export async function test()
     };
 
     let splat_loader = new SplatLoader();
-    let splatBuffer = await splat_loader.loadFromURL("./assets/truck_high.splat", downloadProgress);
-
-    let splats = new Splats(splatBuffer);
     
+    let splatBuffer = await splat_loader.loadFromURL("./assets/truck_high.splat", downloadProgress);
 
     let camera = new PerspectiveCameraEx();
     camera.up.set(0, -1, -.17);
@@ -49,6 +47,27 @@ export async function test()
     controls.target.set(1, 1, 0); 
     controls.enableDamping = true; 
 
+    /*let splatBuffer = await splat_loader.loadFromURL("./assets/garden_high.splat", downloadProgress);
+
+    let camera = new PerspectiveCameraEx();
+    camera.up.set(0, -1, -0.54);
+    camera.position.set(-3.15634, -0.16946, -0.51552); 
+
+    let controls = new OrbitControls(camera, canvas);    
+    controls.target.set(1.52976, 2.27776, 1.65898); 
+    controls.enableDamping = true; */
+
+    /*let splatBuffer = await splat_loader.loadFromURL("./assets/stump_high.splat", downloadProgress);
+
+    let camera = new PerspectiveCameraEx();
+    camera.up.set(0, -1, -1.0);
+    camera.position.set(-3.3816, 1.96931, -1.71890); 
+
+    let controls = new OrbitControls(camera, canvas);    
+    controls.target.set(0.60910, 1.42099, 2.02511); 
+    controls.enableDamping = true; */
+
+    let splats = new Splats(splatBuffer);
     let render_target = new GPURenderTarget(canvas_ctx, false); 
     
     let t = Date.now();
@@ -80,21 +99,22 @@ export async function test()
         
         let half_fov_y = 25.0 * Math.PI/180.0;
         let half_fov_x = Math.atan(Math.tan(half_fov_y) *  camera.aspect);
-        let alpha = Math.max(half_fov_y, half_fov_x);             
+        let alpha = Math.max(half_fov_y, half_fov_x);                     
 
         let view_vec = new Vector3(camera.matrixWorld.elements[8],camera.matrixWorld.elements[9],camera.matrixWorld.elements[10]);
         let sort = true;
+        let thresh_angle = Math.PI*0.333;
         if (last_view_vec!=null)
         {            
             let delta_angle = Math.acos(Math.min(view_vec.dot(last_view_vec),1.0));
-            if (delta_angle + alpha<Math.PI*0.5)
+            if (delta_angle + alpha<thresh_angle)
             {
                 sort = false;
             }
         }
 
         if (sort)
-        {    
+        {   
             splats.sort(view_vec);
             last_view_vec = view_vec;
         }

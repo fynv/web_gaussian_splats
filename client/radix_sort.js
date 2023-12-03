@@ -42,6 +42,17 @@ var<storage, read_write> bGroup1 : array<i32>;
 var<storage, read_write> bGroup2 : array<i32>;
 `)}
 
+
+const encodeNorm4 = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0); 
+const mask4 = vec4(u32(0x000000FF), u32(0x0000FF00), u32(0x00FF0000), u32(0xFF000000));
+const shift4 = vec4u(0, 8, 16, 24);
+
+fn uintToRGBAVec (u: u32) ->vec4f
+{
+    let urgba = (mask4 & vec4(u)) >> vec4(shift4);
+    return vec4f(urgba) * encodeNorm4;
+}
+
 fn getDataIdx(idx: u32, stride: i32, offset: i32, width: u32) -> vec2u
 {    
     let d = idx * u32(stride) + u32(offset);
@@ -55,6 +66,12 @@ fn inFrustum(idx : u32, width: u32) -> bool
 {
     let sampledCenterColor = textureLoad(uCentersColorsTexture, getDataIdx(idx, 1, 0, width), 0);
     let splatCenter = bitcast<vec3f>(sampledCenterColor.yzw);
+    let color = uintToRGBAVec(sampledCenterColor.x);
+    if (color.w == 0.0)
+    {
+        return false;
+    }
+
     let viewCenter = uCamera.viewMat * vec4(splatCenter, 1.0);
     if (length(viewCenter)>125.0)
     {

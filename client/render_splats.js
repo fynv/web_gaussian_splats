@@ -154,7 +154,7 @@ fn fs_main(@location(0) color: vec4f, @location(1) normPos: vec2f) -> @location(
 function GetPipeline(view_format, msaa)
 {
     if (!("render_splats" in engine_ctx.cache.pipelines))
-    {
+    {        
         let camera_options = { has_reflector: false };
         let camera_signature =  JSON.stringify(camera_options);
         let camera_layout = engine_ctx.cache.bindGroupLayouts.perspective_camera[camera_signature];
