@@ -21,7 +21,9 @@ var uCentersColorsTexture: texture_2d<u32>;
 struct Constant
 {
     focal: vec2f,
-    basisViewport: vec2f
+    basisViewport: vec2f,
+    r_aperture: f32,
+    focal_z: f32
 };
 
 @group(1) @binding(2)
@@ -87,8 +89,11 @@ fn vs_main(input: VSIn) -> VSOut
     let sampledCovarianceB = textureLoad(uCovariancesTexture, getDataIdx(idx, 3, 1, width_Cov), 0).xy;
     let sampledCovarianceC = textureLoad(uCovariancesTexture, getDataIdx(idx, 3, 2, width_Cov), 0).xy;
 
-    let cov3D_M11_M12_M13 = vec3(sampledCovarianceA.rg, sampledCovarianceB.r);
-    let cov3D_M22_M23_M33 = vec3(sampledCovarianceB.g, sampledCovarianceC.rg);
+    let defocus = uRender.r_aperture * abs(-viewCenter.z -  uRender.focal_z) / uRender.focal_z;
+    let defocus2 = defocus * defocus;
+
+    let cov3D_M11_M12_M13 = vec3(sampledCovarianceA.rg, sampledCovarianceB.r) + vec3(defocus2, 0.0, 0.0);
+    let cov3D_M22_M23_M33 = vec3(sampledCovarianceB.g, sampledCovarianceC.rg) + vec3(defocus2, 0.0, defocus2);
 
     let Vrk = mat3x3(
         cov3D_M11_M12_M13.x, cov3D_M11_M12_M13.y, cov3D_M11_M12_M13.z,
@@ -122,6 +127,9 @@ fn vs_main(input: VSIn) -> VSOut
     let term2 = sqrt(trace * trace / 4.0 - D);
     let eigenValue1 = traceOver2 + term2;
     let eigenValue2 = max(traceOver2 - term2, 0.0); 
+
+    let alpha_rate = sqrt((eigenValue1 - defocus2) * (eigenValue2 - defocus2)/(eigenValue1 * eigenValue2));
+    out.color.w = 1.0 - pow(1.0 - out.color.w, alpha_rate);
 
     const maxSplatSize = 1024.0;
     let eigenVector1 = normalize(vec2(b, eigenValue1 - a));

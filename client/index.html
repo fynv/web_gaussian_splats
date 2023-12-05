@@ -7,8 +7,12 @@
     </head>
     <body style="touch-action: none;">
         <canvas id="gfx"></canvas>
-        <div id="error"></div>        
-        <div id="info" style="position: absolute; z-index:10;"></div>
+        <div style="position: absolute; z-index:10;">
+            <div id="error"></div>        
+            <div id="info"></div>
+            <input type="range" id="r_aperture" min="0" max="15" step="0.1" value="0" style="width:150px;">
+            <input type="range" id="focal_z" min="1" max="20" step="0.1" value="3" style="width:150px;">
+        </div>
                 
         <script type="module">
             import {test} from './test.js'

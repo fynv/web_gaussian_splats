@@ -17,6 +17,20 @@ export class Splats
     {
         this.splatBuffer = splatBuffer;
         this._initialize();
+        this.r_aperture = 0.0;
+        this.focal_z = 3.0;
+    }
+
+    set_r_aperture(r_aperture)
+    {
+        this.r_aperture = r_aperture;
+        this.updateConstant();
+    }
+
+    set_focal_z(focal_z)
+    {
+        this.focal_z = focal_z;
+        this.updateConstant();
     }
 
     _initialize()
@@ -81,7 +95,7 @@ export class Splats
             engine_ctx.queue.submit([cmdBuf]);
         }
 
-        this.dConstant = engine_ctx.createBuffer0(16, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+        this.dConstant = engine_ctx.createBuffer0(32, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
 
         this.dIndices =  engine_ctx.createBuffer0(splatCount * 4, GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE);
         this.dIndices1 = engine_ctx.createBuffer0(splatCount * 4, GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE);        
@@ -851,11 +865,13 @@ export class Splats
 
     updateConstant(camera, devicePixelRatio, renderDimensions)
     {
-        const uniform = new Float32Array(4);
+        const uniform = new Float32Array(8);
         uniform[0] = camera.projectionMatrix.elements[0] * devicePixelRatio * renderDimensions.x * 0.45;
         uniform[1] = camera.projectionMatrix.elements[5] * devicePixelRatio * renderDimensions.y * 0.45;
         uniform[2] = 2.0 / (renderDimensions.x * devicePixelRatio);
-        uniform[3] = 2.0 / (renderDimensions.y * devicePixelRatio);        
+        uniform[3] = 2.0 / (renderDimensions.y * devicePixelRatio);   
+        uniform[4] = this.r_aperture;
+        uniform[5] = this.focal_z;     
         engine_ctx.queue.writeBuffer(this.dConstant, 0, uniform.buffer, uniform.byteOffset, uniform.byteLength);
     }
 

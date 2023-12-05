@@ -76,6 +76,23 @@ export async function test()
     let last_camera_pos = null;
     let last_camera_quat = null;
 
+    let input_r_aperture = document.getElementById("r_aperture");
+    let input_focal_z = document.getElementById("focal_z");
+
+    input_r_aperture.addEventListener("input", ()=>
+    {
+        let r_aperture = input_r_aperture.value * 0.001;
+        splats.set_r_aperture(r_aperture);
+
+    });
+
+    input_focal_z.addEventListener("input", ()=>
+    {
+        let focal_z = input_focal_z.value;
+        splats.set_focal_z(focal_z);
+    });
+
+
     const render = () =>
     {
         let t1 = Date.now();
